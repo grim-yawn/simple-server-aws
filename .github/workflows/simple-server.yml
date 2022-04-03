@@ -1,9 +1,8 @@
 name: nginx server
 on: [push]
-env:
-  DOCKER_IMAGE: ghcr.io/grim_yawn/simple-server-aws
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: docker build -t ${{ env.DOCKER_IMAGE }}:${{ env.GITHUB_SHA }} .
+      - uses: actions/checkout@v3
+      - run: docker build -t ghcr.io/grim_yawn/simple-server-aws:${{ github.sha }} .
