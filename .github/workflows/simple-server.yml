@@ -1,0 +1,11 @@
+name: nginx server
+on: [push]
+env:
+  DOCKER_REGISTRY: ghcr.io
+  DOCKER_IMAGE: $DOCKER_REGISTRY/grim_yawn/
+  DOCKER_TAG: $GITHUB_SHA
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: docker build -t "$DOCKER_IMAGE:$DOCKER_TAG" .
