@@ -43,7 +43,7 @@ jobs:
       - build
     runs-on: ubuntu-latest
     env:
-      TF_VAR_server_image: ${{ build.docker_image }}
+      TF_VAR_server_image: ${{ jobs.build.outputs.docker_image }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
