@@ -47,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_VAR_server_image: ${{ needs.jobs.build.outputs.docker_image_tag }}
+      TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
     defaults:
       run:
         working-directory: ./terraform
@@ -56,9 +58,6 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
-
-      - name: Debug
-        run: ls -l
 
       - name: Terraform init
         run: |
