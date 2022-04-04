@@ -12,16 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      docker_image: ${{ steps.build-and-push.imageid }}
+      docker_image: ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.meta.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
 
       - name: Log into registry ${{ env.DOCKER_REGISTRY }}
         uses: docker/login-action@v1
@@ -29,6 +23,15 @@ jobs:
           registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{raw}}
 
       - name: Build and push Docker image
         id: build-and-push
