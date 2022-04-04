@@ -63,9 +63,9 @@ jobs:
       - name: Terraform init
         run: |
           terraform init \
-            -backend-config="access_key=${{ env.AWS_ACCESS_KEY_ID }}" \
-            -backend-config="secret_key=${{ env.AWS_SECRET_KEY }}" \
-            -backend-config="bucket=${{ env.AWS_BACKEND_BUCKET }}"
+            -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            -backend-config="secret_key=${{ secrets.AWS_SECRET_KEY }}" \
+            -backend-config="bucket=${{ secrets.AWS_BACKEND_BUCKET }}"
 
       - name: Check if config has proper formatting
         run: terraform fmt -check
