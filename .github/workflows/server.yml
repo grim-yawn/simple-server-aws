@@ -3,8 +3,6 @@ on:
   push:
     branches: [ main ]
     tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ main ]
 
 env:
   DOCKER_REGISTRY: ghcr.io
@@ -17,7 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Extract repository metadata (tags, labels) for Docker
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v3
@@ -31,7 +28,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build and push Docker image with Buildx (don't push on PR)
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@v2
@@ -39,3 +35,24 @@ jobs:
           context: .
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Check if config has proper formatting
+        run: terraform fmt -check
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Check if config valid
+        run: terraform validate -no-color
+
+      - name: Apply configuration
+        run: terraform apply -auto-approve

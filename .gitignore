@@ -2,3 +2,7 @@
 .idea/
 .vscode
 
+# Terraform
+.terraform/
+.auto.tfvars
+*.lock*.hcl
