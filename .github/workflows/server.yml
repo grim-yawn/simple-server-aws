@@ -4,15 +4,12 @@ on:
     branches: [ main ]
     tags: [ 'v*.*.*' ]
 
-env:
-  DOCKER_REGISTRY: ghcr.io
-  DOCKER_IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      docker_image: ${{ steps.meta.outputs.tags[0] }}
+    env:
+      DOCKER_REGISTRY: ghcr.io
+      DOCKER_IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -41,12 +38,15 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+    outputs:
+      docker_image_tag: ${{ steps.meta.outputs.tags }}
+
   deploy:
     needs:
       - build
     runs-on: ubuntu-latest
     env:
-      TF_VAR_server_image: ${{ needs.jobs.build.outputs.docker_image }}
+      TF_VAR_server_image: ${{ needs.jobs.build.outputs.docker_image_tag }}
     defaults:
       run:
         working-directory: ./terraform
