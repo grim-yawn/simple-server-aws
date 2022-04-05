@@ -4,6 +4,7 @@
 
 ### Safety
 All secret should be set via ENV or in files named `.auto.tfvars` which will be excluded from version control.
+You need to setup aws profile with name "terraform"
 
 ### Backend
 This configuration uses aws s3 bucket to store, first thing to do:
@@ -21,10 +22,7 @@ terraform apply
 Due to terraform limitations you can't use variables inside backend configuration
 ```shell
 # Inside ./terraform
-terraform init \
-  -backend-config="access_key=${AWS_ACCESS_KEY_ID}" \
-  -backend-config="secret_key=${AWS_SECRET_KEY}" \
-  -backend-config="bucket=${BACKEND_BUCKET}"
+terraform init
 ```
 
 ```shell
