@@ -65,13 +65,13 @@ resource "aws_ecs_service" "server" {
 
 # Task definition for server
 resource "aws_ecs_task_definition" "server" {
-  family = "server"
+  family             = "server"
   execution_role_arn = aws_iam_role.ecs_task_assume_role.arn
 
   container_definitions = jsonencode([
     {
-      name         = "nginx"
-      image        = var.server_image
+      name  = "nginx"
+      image = var.server_image
       portMappings = [
         {
           containerPort = 8080
@@ -79,7 +79,7 @@ resource "aws_ecs_task_definition" "server" {
       ]
       logConfiguration = {
         logDriver = "awslogs"
-        options   = {
+        options = {
           awslogs-region        = var.region
           awslogs-group         = "/ecs/server"
           awslogs-stream-prefix = "ecs"

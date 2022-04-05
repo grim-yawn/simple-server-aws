@@ -134,7 +134,7 @@ resource "aws_security_group" "http" {
 resource "aws_security_group" "egress_all" {
   name        = "egress-all"
   description = "All outbound traffic"
-  vpc_id = aws_vpc.production.id
+  vpc_id      = aws_vpc.production.id
 
   egress {
     from_port   = 0
