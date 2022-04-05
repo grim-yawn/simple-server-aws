@@ -38,8 +38,8 @@ resource "aws_ecs_service" "server" {
   cluster     = aws_ecs_cluster.production.id
   launch_type = "FARGATE"
 
-  task_definition = aws_ecs_task_definition.server.arn
-  desired_count   = 1
+  task_definition      = aws_ecs_task_definition.server.arn
+  desired_count        = 1
   force_new_deployment = true
 
   network_configuration {
@@ -101,11 +101,11 @@ resource "aws_ecs_task_definition" "server" {
 
 # Load balancer target
 resource "aws_lb_target_group" "server" {
-  name        = "server"
-  vpc_id      = aws_vpc.production.id
+  name   = "server"
+  vpc_id = aws_vpc.production.id
 
-  port     = 8080
-  protocol = "HTTP"
+  port        = 8080
+  protocol    = "HTTP"
   target_type = "ip"
 
   health_check {
