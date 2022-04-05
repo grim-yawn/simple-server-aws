@@ -22,9 +22,9 @@ Due to terraform limitations you can't use variables inside backend configuratio
 ```shell
 # Inside ./terraform
 terraform init \
-  -backend-config="bucket=${BACKEND_BUCKET}"
   -backend-config="access_key=${AWS_ACCESS_KEY_ID}" \
-  -backend-config="secret_key=${AWS_SECRET_KEY}"
+  -backend-config="secret_key=${AWS_SECRET_KEY}" \
+  -backend-config="bucket=${BACKEND_BUCKET}"
 ```
 
 ```shell
