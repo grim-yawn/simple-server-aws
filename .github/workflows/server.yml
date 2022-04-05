@@ -57,8 +57,6 @@ jobs:
 
       - name: Login to aws
         uses: aws-actions/configure-aws-credentials@v1
-        env:
-          AWS_DEFAULT_PROFILE: terraform
         with:
           aws-region: us-east-1
           aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
