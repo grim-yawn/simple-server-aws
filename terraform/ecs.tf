@@ -43,7 +43,6 @@ resource "aws_ecs_service" "server" {
   force_new_deployment = true
 
   network_configuration {
-    assign_public_ip = false
 
     security_groups = [
       aws_security_group.egress_all.id,
