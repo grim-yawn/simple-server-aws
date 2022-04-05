@@ -35,18 +35,19 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
 # Server service
 resource "aws_ecs_service" "server" {
   name        = "server"
-  cluster     = aws_ecs_cluster.production.name
+  cluster     = aws_ecs_cluster.production.id
   launch_type = "FARGATE"
 
   task_definition = aws_ecs_task_definition.server.arn
   desired_count   = 1
+  force_new_deployment = true
 
   network_configuration {
     assign_public_ip = false
 
     security_groups = [
       aws_security_group.egress_all.id,
-      aws_security_group.http.id,
+      aws_security_group.ingress_server_all.id,
     ]
 
     subnets = [
@@ -77,6 +78,7 @@ resource "aws_ecs_task_definition" "server" {
           containerPort = 8080
         }
       ]
+      command = ["nginx", "-g", "daemon off;"]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -101,10 +103,10 @@ resource "aws_ecs_task_definition" "server" {
 resource "aws_lb_target_group" "server" {
   name        = "server"
   vpc_id      = aws_vpc.production.id
-  target_type = "ip"
 
-  port     = 80
+  port     = 8080
   protocol = "HTTP"
+  target_type = "ip"
 
   health_check {
     enabled = true
@@ -117,8 +119,8 @@ resource "aws_lb_target_group" "server" {
 # Load balancer
 resource "aws_alb" "server" {
   name               = "server-lb"
-  load_balancer_type = "application"
   internal           = false
+  load_balancer_type = "application"
 
   subnets = [
     aws_subnet.public_a.id,

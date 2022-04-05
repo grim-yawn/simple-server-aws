@@ -82,9 +82,10 @@ resource "aws_route_table_association" "private_a_subnet" {
 }
 
 resource "aws_route_table_association" "private_b_subnet" {
-  route_table_id = aws_route_table.public.id
+  route_table_id = aws_route_table.private.id
   subnet_id      = aws_subnet.private_b.id
 }
+
 
 # Elastic IP
 resource "aws_eip" "nat" {
@@ -112,7 +113,7 @@ resource "aws_nat_gateway" "ngw" {
 
 resource "aws_route" "private_ngw" {
   route_table_id         = aws_route_table.private.id
-  gateway_id             = aws_nat_gateway.ngw.id
+  nat_gateway_id         = aws_nat_gateway.ngw.id
   destination_cidr_block = "0.0.0.0/0"
 }
 
@@ -140,6 +141,19 @@ resource "aws_security_group" "egress_all" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "ingress_server_all" {
+  name        = "ingress-server"
+  description = "Allow ingress to Server"
+  vpc_id      = aws_vpc.production.id
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
