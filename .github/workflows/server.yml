@@ -48,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_VAR_server_image: ${{ needs.jobs.build.outputs.docker_image_tag }}
+      AWS_DEFAULT_PROFILE: terraform
     defaults:
       run:
         working-directory: ./terraform
@@ -57,12 +58,15 @@ jobs:
 
       - name: Login to aws
         uses: aws-actions/configure-aws-credentials@v1
-        env:
-          AWS_DEFAULT_PROFILE: terraform
         with:
           aws-region: us-east-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+
+      - name: Add profile credentials to ~/.aws/credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} --profile ${{ env.AWS_DEFAULT_PROFILE }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_KEY }} --profile ${{ env.AWS_DEFAULT_PROFILE }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
@@ -75,9 +79,6 @@ jobs:
 
       - name: Check if config is valid
         run: terraform validate -no-color
-
-      - name: Display plan
-        run: terraform plan -no-color
 
       - name: Apply configuration
         run: terraform apply -auto-approve
