@@ -40,17 +40,17 @@ resource "aws_ecs_task_definition" "server" {
 
   container_definitions = jsonencode([
     {
-      name         = "nginx"
-      image        = var.server_image
+      name  = "nginx"
+      image = var.server_image
       portMappings = [
         {
           containerPort = 8080
         }
       ]
-      command          = ["nginx", "-g", "daemon off;"]
+      command = ["nginx", "-g", "daemon off;"]
       logConfiguration = {
         logDriver = "awslogs"
-        options   = {
+        options = {
           awslogs-region        = var.region
           awslogs-group         = "/ecs/server"
           awslogs-stream-prefix = "ecs"

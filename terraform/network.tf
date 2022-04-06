@@ -29,7 +29,7 @@ resource "aws_subnet" "private_d" {
 
 # Public subnet in second availability zone
 resource "aws_subnet" "public_e" {
-  vpc_id            = aws_vpc.production.id
+  vpc_id = aws_vpc.production.id
 
   cidr_block        = "10.0.1.128/25"
   availability_zone = "us-east-1e"
@@ -41,9 +41,9 @@ resource "aws_subnet" "public_e" {
 
 # Private subnet in second availability zone
 resource "aws_subnet" "private_e" {
-  vpc_id     = aws_vpc.production.id
+  vpc_id = aws_vpc.production.id
 
-  cidr_block = "10.0.2.128/25"
+  cidr_block        = "10.0.2.128/25"
   availability_zone = "us-east-1e"
 
   tags = {
