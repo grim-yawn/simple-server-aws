@@ -3,10 +3,80 @@ resource "aws_ecs_cluster" "production" {
   name = "production"
 }
 
+# Server service
+resource "aws_ecs_service" "server" {
+  name        = "server"
+  cluster     = aws_ecs_cluster.production.id
+  launch_type = "FARGATE"
+
+  task_definition = aws_ecs_task_definition.server.arn
+  desired_count   = 1
+
+  network_configuration {
+    assign_public_ip = false
+
+    security_groups = [
+      aws_security_group.egress_all.id,
+      aws_security_group.ingress_server_all.id,
+    ]
+
+    subnets = [
+      aws_subnet.private_d.id,
+      aws_subnet.private_e.id,
+    ]
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.server.arn
+    container_name   = "nginx"
+    container_port   = 8080
+  }
+}
+
+# Task definition for server
+resource "aws_ecs_task_definition" "server" {
+  family             = "server"
+  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name         = "nginx"
+      image        = var.server_image
+      portMappings = [
+        {
+          containerPort = 8080
+        }
+      ]
+      command          = ["nginx", "-g", "daemon off;"]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options   = {
+          awslogs-region        = var.region
+          awslogs-group         = "/ecs/server"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+    }
+  ])
+
+  # Minimum resources
+  cpu    = 256
+  memory = 512
+
+  # FARGATE compatibility
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+}
+
+
+# Log group for server
+resource "aws_cloudwatch_log_group" "server" {
+  name = "/ecs/server"
+}
 
 # Role for logging in task
-resource "aws_iam_role" "ecs_task_assume_role" {
-  name               = "server-excution-role"
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name               = "server-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
 }
 
@@ -28,74 +98,8 @@ data "aws_iam_policy" "ecs_task_execution_role" {
 
 # Attach policy to execution role
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
-  role       = aws_iam_role.ecs_task_assume_role.name
+  role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = data.aws_iam_policy.ecs_task_execution_role.arn
-}
-
-# Server service
-resource "aws_ecs_service" "server" {
-  name        = "server"
-  cluster     = aws_ecs_cluster.production.id
-  launch_type = "FARGATE"
-
-  task_definition      = aws_ecs_task_definition.server.arn
-  desired_count        = 1
-  force_new_deployment = true
-
-  network_configuration {
-
-    security_groups = [
-      aws_security_group.egress_all.id,
-      aws_security_group.ingress_server_all.id,
-    ]
-
-    subnets = [
-      aws_subnet.private_a.id,
-      aws_subnet.private_b.id,
-    ]
-  }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.server.arn
-    container_name   = "nginx"
-    container_port   = 8080
-  }
-}
-
-
-# Task definition for server
-resource "aws_ecs_task_definition" "server" {
-  family             = "server"
-  execution_role_arn = aws_iam_role.ecs_task_assume_role.arn
-
-  container_definitions = jsonencode([
-    {
-      name  = "nginx"
-      image = var.server_image
-      portMappings = [
-        {
-          containerPort = 8080
-        }
-      ]
-      command = ["nginx", "-g", "daemon off;"]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-region        = var.region
-          awslogs-group         = "/ecs/server"
-          awslogs-stream-prefix = "ecs"
-        }
-      }
-    }
-  ])
-
-  # Minimum resources
-  cpu    = 256
-  memory = 512
-
-  # Fargate compatible#
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
 }
 
 # Load balancer target
@@ -122,12 +126,13 @@ resource "aws_alb" "server" {
   load_balancer_type = "application"
 
   subnets = [
-    aws_subnet.public_a.id,
-    aws_subnet.public_b.id,
+    aws_subnet.public_d.id,
+    aws_subnet.public_e.id,
   ]
 
   security_groups = [
     aws_security_group.http.id,
+    aws_security_group.https.id,
     aws_security_group.egress_all.id,
   ]
 
